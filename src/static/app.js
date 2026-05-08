@@ -33,6 +33,7 @@ document.addEventListener("DOMContentLoaded", () => {
     community: { label: "Community", color: "#fff3e0", textColor: "#e65100" },
     technology: { label: "Technology", color: "#e8eaf6", textColor: "#3949ab" },
   };
+  const SCHOOL_ACTIVITY_SITE_NAME = "Mergington High School Activities";
 
   // State for activities and filters
   let allActivities = {};
@@ -306,10 +307,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Build share links for an activity
   function getShareData(activityName, details) {
-    const activityUrl = `${window.location.origin}/static/index.html?activity=${encodeURIComponent(
-      activityName
-    )}`;
-    const shareText = `Check out ${activityName} at Mergington High School Activities! ${details.description}`;
+    const activityUrlObject = new URL(window.location.href);
+    activityUrlObject.searchParams.set("activity", activityName);
+    const activityUrl = activityUrlObject.toString();
+    const shareText = `Check out ${activityName} at ${SCHOOL_ACTIVITY_SITE_NAME}! ${details.description}`;
 
     return {
       activityUrl,
@@ -618,7 +619,10 @@ document.addEventListener("DOMContentLoaded", () => {
           await navigator.clipboard.writeText(shareUrl);
           showMessage(`Share link copied for ${activityName}.`, "success");
         } catch (error) {
-          showMessage(`Could not copy automatically. Share this link: ${shareUrl}`, "error");
+          showMessage(
+            "Unable to copy link automatically. Please try again or use another sharing option.",
+            "error"
+          );
         }
       });
     }
