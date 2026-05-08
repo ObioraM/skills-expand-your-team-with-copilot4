@@ -304,6 +304,24 @@ document.addEventListener("DOMContentLoaded", () => {
     return details.schedule;
   }
 
+  // Build share links for an activity
+  function getShareData(activityName, details) {
+    const activityUrl = `${window.location.origin}${window.location.pathname}?activity=${encodeURIComponent(
+      activityName
+    )}`;
+    const shareText = `Check out ${activityName} at Mergington High School Activities! ${details.description}`;
+
+    return {
+      activityUrl,
+      emailLink: `mailto:?subject=${encodeURIComponent(
+        `Activity recommendation: ${activityName}`
+      )}&body=${encodeURIComponent(`${shareText}\n\n${activityUrl}`)}`,
+      whatsappLink: `https://wa.me/?text=${encodeURIComponent(
+        `${shareText} ${activityUrl}`
+      )}`,
+    };
+  }
+
   // Function to determine activity type (this would ideally come from backend)
   function getActivityType(activityName, description) {
     const name = activityName.toLowerCase();
@@ -498,6 +516,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Format the schedule using the new helper function
     const formattedSchedule = formatSchedule(details);
+    const shareData = getShareData(name, details);
 
     // Create activity tag
     const tagHtml = `
@@ -519,6 +538,17 @@ document.addEventListener("DOMContentLoaded", () => {
       </div>
     `;
 
+    const shareControls = `
+      <div class="share-section">
+        <span class="share-label">Share:</span>
+        <div class="share-actions">
+          <a href="${shareData.emailLink}" class="share-button" aria-label="Share ${name} by email">Email</a>
+          <a href="${shareData.whatsappLink}" target="_blank" rel="noopener noreferrer" class="share-button" aria-label="Share ${name} on WhatsApp">WhatsApp</a>
+          <button class="share-button copy-share-button" data-share-url="${shareData.activityUrl}" data-activity-name="${name}" aria-label="Copy share link for ${name}">Copy Link</button>
+        </div>
+      </div>
+    `;
+
     activityCard.innerHTML = `
       ${tagHtml}
       <h4>${name}</h4>
@@ -528,6 +558,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <span class="tooltip-text">Regular meetings at this time throughout the semester</span>
       </p>
       ${capacityIndicator}
+      ${shareControls}
       <div class="participants-list">
         <h5>Current Participants:</h5>
         <ul>
@@ -575,6 +606,19 @@ document.addEventListener("DOMContentLoaded", () => {
     const deleteButtons = activityCard.querySelectorAll(".delete-participant");
     deleteButtons.forEach((button) => {
       button.addEventListener("click", handleUnregister);
+    });
+
+    const copyShareButton = activityCard.querySelector(".copy-share-button");
+    copyShareButton.addEventListener("click", async (event) => {
+      const shareUrl = event.currentTarget.dataset.shareUrl;
+      const activityName = event.currentTarget.dataset.activityName;
+
+      try {
+        await navigator.clipboard.writeText(shareUrl);
+        showMessage(`Share link copied for ${activityName}.`, "success");
+      } catch (error) {
+        showMessage("Could not copy link. Please copy it from your address bar.", "error");
+      }
     });
 
     // Add click handler for register button (only when authenticated)
