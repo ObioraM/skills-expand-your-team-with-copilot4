@@ -33,7 +33,8 @@ document.addEventListener("DOMContentLoaded", () => {
     community: { label: "Community", color: "#fff3e0", textColor: "#e65100" },
     technology: { label: "Technology", color: "#e8eaf6", textColor: "#3949ab" },
   };
-  const SCHOOL_ACTIVITY_SITE_NAME = document.title || "Mergington High School Activities";
+  const SITE_NAME = document.title || "Mergington High School Activities";
+  const MAX_SHARE_DESCRIPTION_LENGTH = 120;
 
   // State for activities and filters
   let allActivities = {};
@@ -311,10 +312,10 @@ document.addEventListener("DOMContentLoaded", () => {
     activityUrlObject.searchParams.set("activity", activityName);
     const activityUrl = activityUrlObject.toString();
     const trimmedDescription =
-      details.description.length > 120
-        ? `${details.description.slice(0, 117)}...`
+      details.description.length > MAX_SHARE_DESCRIPTION_LENGTH
+        ? `${details.description.slice(0, MAX_SHARE_DESCRIPTION_LENGTH - 3)}...`
         : details.description;
-    const shareText = `Check out ${activityName} at ${SCHOOL_ACTIVITY_SITE_NAME}! ${trimmedDescription}`;
+    const shareText = `Check out ${activityName} at ${SITE_NAME}! ${trimmedDescription}`;
 
     return {
       activityUrl,
@@ -623,7 +624,7 @@ document.addEventListener("DOMContentLoaded", () => {
           showMessage(`Share link copied for ${name}.`, "success");
         } catch (error) {
           showMessage(
-            "Unable to copy link automatically. Please try again or use another sharing option.",
+            "Could not copy link. Please try again or use Email or WhatsApp instead.",
             "error"
           );
         }
