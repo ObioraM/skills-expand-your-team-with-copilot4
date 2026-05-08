@@ -37,6 +37,9 @@ document.addEventListener("DOMContentLoaded", () => {
     community: { label: "Community", color: "#fff3e0", textColor: "#e65100" },
     technology: { label: "Technology", color: "#e8eaf6", textColor: "#3949ab" },
   };
+  const siteNameMetaTag = document.querySelector('meta[name="site-name"]');
+  const SITE_NAME = siteNameMetaTag?.content || "Mergington High School Activities";
+  const MAX_SHARE_DESCRIPTION_LENGTH = 120;
 
   // State for activities and filters
   let allActivities = {};
@@ -330,6 +333,28 @@ document.addEventListener("DOMContentLoaded", () => {
     return details.schedule;
   }
 
+  // Build share links for an activity
+  function getShareData(activityName, details) {
+    const activityUrlObject = new URL(window.location.href);
+    activityUrlObject.searchParams.set("activity", activityName);
+    const activityUrl = activityUrlObject.toString();
+    const trimmedDescription =
+      details.description.length > MAX_SHARE_DESCRIPTION_LENGTH
+        ? `${details.description.slice(0, MAX_SHARE_DESCRIPTION_LENGTH - 3)}...`
+        : details.description;
+    const shareText = `Check out ${activityName} at ${SITE_NAME}! ${trimmedDescription}`;
+
+    return {
+      activityUrl,
+      emailLink: `mailto:?subject=${encodeURIComponent(
+        `Activity recommendation: ${activityName}`
+      )}&body=${encodeURIComponent(`${shareText}\n\n${activityUrl}`)}`,
+      whatsappLink: `https://wa.me/?text=${encodeURIComponent(
+        `${shareText} ${activityUrl}`
+      )}`,
+    };
+  }
+
   // Function to determine activity type (this would ideally come from backend)
   function getActivityType(activityName, description) {
     const name = activityName.toLowerCase();
@@ -532,6 +557,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Format the schedule using the new helper function
     const formattedSchedule = formatSchedule(details);
+    const shareData = getShareData(name, details);
 
     // Create activity tag
     const tagHtml = `
@@ -553,6 +579,17 @@ document.addEventListener("DOMContentLoaded", () => {
       </div>
     `;
 
+    const shareControls = `
+      <div class="share-section">
+        <span class="share-label">Share:</span>
+        <div class="share-actions">
+          <a href="${shareData.emailLink}" class="share-button" aria-label="Share activity by email">Email</a>
+          <a href="${shareData.whatsappLink}" target="_blank" rel="noopener noreferrer" class="share-button" aria-label="Share activity on WhatsApp">WhatsApp</a>
+          <button class="share-button copy-share-button" data-share-url="${shareData.activityUrl}" aria-label="Copy share link">Copy Link</button>
+        </div>
+      </div>
+    `;
+
     activityCard.innerHTML = `
       ${tagHtml}
       <h4>${name}</h4>
@@ -562,6 +599,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <span class="tooltip-text">Regular meetings at this time throughout the semester</span>
       </p>
       ${capacityIndicator}
+      ${shareControls}
       <div class="participants-list">
         <h5>Current Participants:</h5>
         <ul>
@@ -610,6 +648,23 @@ document.addEventListener("DOMContentLoaded", () => {
     deleteButtons.forEach((button) => {
       button.addEventListener("click", handleUnregister);
     });
+
+    const copyShareButton = activityCard.querySelector(".copy-share-button");
+    if (copyShareButton) {
+      copyShareButton.addEventListener("click", async (event) => {
+        const shareUrl = event.currentTarget.dataset.shareUrl;
+
+        try {
+          await navigator.clipboard.writeText(shareUrl);
+          showMessage(`Share link copied for ${name}.`, "success");
+        } catch (error) {
+          showMessage(
+            "Could not copy link. Please try again or use another sharing method.",
+            "error"
+          );
+        }
+      });
+    }
 
     // Add click handler for register button (only when authenticated)
     if (currentUser) {
