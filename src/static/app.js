@@ -33,7 +33,8 @@ document.addEventListener("DOMContentLoaded", () => {
     community: { label: "Community", color: "#fff3e0", textColor: "#e65100" },
     technology: { label: "Technology", color: "#e8eaf6", textColor: "#3949ab" },
   };
-  const SITE_NAME = document.title || "Mergington High School Activities";
+  const siteNameMetaTag = document.querySelector('meta[name="site-name"]');
+  const SITE_NAME = siteNameMetaTag?.content || "Mergington High School Activities";
   const MAX_SHARE_DESCRIPTION_LENGTH = 120;
 
   // State for activities and filters
@@ -624,7 +625,7 @@ document.addEventListener("DOMContentLoaded", () => {
           showMessage(`Share link copied for ${name}.`, "success");
         } catch (error) {
           showMessage(
-            "Could not copy link. Please try again or use Email or WhatsApp instead.",
+            "Could not copy link. Please try again or use another sharing method.",
             "error"
           );
         }
