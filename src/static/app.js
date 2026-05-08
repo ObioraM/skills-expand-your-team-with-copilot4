@@ -33,7 +33,7 @@ document.addEventListener("DOMContentLoaded", () => {
     community: { label: "Community", color: "#fff3e0", textColor: "#e65100" },
     technology: { label: "Technology", color: "#e8eaf6", textColor: "#3949ab" },
   };
-  const SCHOOL_ACTIVITY_SITE_NAME = "Mergington High School Activities";
+  const SCHOOL_ACTIVITY_SITE_NAME = document.title || "Mergington High School Activities";
 
   // State for activities and filters
   let allActivities = {};
@@ -310,7 +310,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const activityUrlObject = new URL(window.location.href);
     activityUrlObject.searchParams.set("activity", activityName);
     const activityUrl = activityUrlObject.toString();
-    const shareText = `Check out ${activityName} at ${SCHOOL_ACTIVITY_SITE_NAME}! ${details.description}`;
+    const trimmedDescription =
+      details.description.length > 120
+        ? `${details.description.slice(0, 117)}...`
+        : details.description;
+    const shareText = `Check out ${activityName} at ${SCHOOL_ACTIVITY_SITE_NAME}! ${trimmedDescription}`;
 
     return {
       activityUrl,
@@ -543,9 +547,9 @@ document.addEventListener("DOMContentLoaded", () => {
       <div class="share-section">
         <span class="share-label">Share:</span>
         <div class="share-actions">
-          <a href="${shareData.emailLink}" class="share-button" aria-label="Share ${name} by email">Email</a>
-          <a href="${shareData.whatsappLink}" target="_blank" rel="noopener noreferrer" class="share-button" aria-label="Share ${name} on WhatsApp">WhatsApp</a>
-          <button class="share-button copy-share-button" data-share-url="${shareData.activityUrl}" data-activity-name="${name}" aria-label="Copy share link for ${name}">Copy Link</button>
+          <a href="${shareData.emailLink}" class="share-button" aria-label="Share activity by email">Email</a>
+          <a href="${shareData.whatsappLink}" target="_blank" rel="noopener noreferrer" class="share-button" aria-label="Share activity on WhatsApp">WhatsApp</a>
+          <button class="share-button copy-share-button" data-share-url="${shareData.activityUrl}" aria-label="Copy share link">Copy Link</button>
         </div>
       </div>
     `;
@@ -613,11 +617,10 @@ document.addEventListener("DOMContentLoaded", () => {
     if (copyShareButton) {
       copyShareButton.addEventListener("click", async (event) => {
         const shareUrl = event.currentTarget.dataset.shareUrl;
-        const activityName = event.currentTarget.dataset.activityName;
 
         try {
           await navigator.clipboard.writeText(shareUrl);
-          showMessage(`Share link copied for ${activityName}.`, "success");
+          showMessage(`Share link copied for ${name}.`, "success");
         } catch (error) {
           showMessage(
             "Unable to copy link automatically. Please try again or use another sharing option.",
