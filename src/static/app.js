@@ -306,7 +306,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Build share links for an activity
   function getShareData(activityName, details) {
-    const activityUrl = `${window.location.origin}${window.location.pathname}?activity=${encodeURIComponent(
+    const activityUrl = `${window.location.origin}/static/index.html?activity=${encodeURIComponent(
       activityName
     )}`;
     const shareText = `Check out ${activityName} at Mergington High School Activities! ${details.description}`;
@@ -609,17 +609,19 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     const copyShareButton = activityCard.querySelector(".copy-share-button");
-    copyShareButton.addEventListener("click", async (event) => {
-      const shareUrl = event.currentTarget.dataset.shareUrl;
-      const activityName = event.currentTarget.dataset.activityName;
+    if (copyShareButton) {
+      copyShareButton.addEventListener("click", async (event) => {
+        const shareUrl = event.currentTarget.dataset.shareUrl;
+        const activityName = event.currentTarget.dataset.activityName;
 
-      try {
-        await navigator.clipboard.writeText(shareUrl);
-        showMessage(`Share link copied for ${activityName}.`, "success");
-      } catch (error) {
-        showMessage("Could not copy link. Please copy it from your address bar.", "error");
-      }
-    });
+        try {
+          await navigator.clipboard.writeText(shareUrl);
+          showMessage(`Share link copied for ${activityName}.`, "success");
+        } catch (error) {
+          showMessage(`Could not copy automatically. Share this link: ${shareUrl}`, "error");
+        }
+      });
+    }
 
     // Add click handler for register button (only when authenticated)
     if (currentUser) {
